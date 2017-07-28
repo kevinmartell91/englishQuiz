@@ -1,0 +1,54 @@
+q: She ate the apple.
+a: The apple was eaten by her.
+
+q: She eats the apples.
+a: The apples are eaten by her.
+
+q: She will eat the apple.
+a: The apple will be eaten by her.
+
+q: She is going to eat the apple.
+a: The apples are going to be eaten by her.
+
+q: She was eating the apples.
+a: The apples were being eating by her.
+
+q: She is eating the apple.
+a: The apple is being eaten by her.
+
+q: She will be eating the apples.
+a: The apples will be being eaten.
+
+q: She is going to be eating the apples.
+a: The apples are going to be being eaten by hey.
+
+q: She had eaten the apple.
+a: The apple had been eaten by her.
+
+q: She has eaten the apples.
+a: The apples have been eaten by her.
+
+q: She will have eaten the apple.
+a: The apple will have been eaten by her.
+
+q: She is going to have eaten the apple.
+a: The apple is going to have been eaten by her.
+
+q: She had been eating the apples.
+a: The apples had been being eaten by her.
+
+q: She has been eating the apple.
+a: The apple has been being eating by her.
+
+q: She will have been eating the apples.
+a: The apples will have been being eaten by her. 
+
+q: She is going to have been eating the apples.
+a: The apples are going to have been being eaten by her.
+
+a: She was going to eat the apple.
+a: The apple was going to be eaten by her.
+
+q: She can't have eaten the apple.
+a: Tha apple can't have been eaten by her.
+fin
