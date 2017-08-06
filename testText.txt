@@ -20,7 +20,7 @@ q: She will be eating the apples.
 a: The apples will be being eaten.
 
 q: She is going to be eating the apples.
-a: The apples are going to be being eaten by hey.
+a: The apples are going to be being eaten by her.
 
 q: She had eaten the apple.
 a: The apple had been eaten by her.
@@ -46,7 +46,7 @@ a: The apples will have been being eaten by her.
 q: She is going to have been eating the apples.
 a: The apples are going to have been being eaten by her.
 
-a: She was going to eat the apple.
+q: She was going to eat the apple.
 a: The apple was going to be eaten by her.
 
 q: She can't have eaten the apple.

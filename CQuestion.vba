@@ -22,5 +22,3 @@ End Property
 Public Property Let Answer(value As String)
     mstrAnswer = value
 End Property
-
-

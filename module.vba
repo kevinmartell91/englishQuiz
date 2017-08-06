@@ -1,7 +1,3 @@
-Option Explicit
-
-' add quizType = 'question' or 'answer'
-' add strStatusQuiz = 'started' or 'finished'
 Dim blnQuestion As Boolean
 Dim blnAnswerInMind As Boolean
 Dim blnRetryQuiz As Boolean
@@ -10,15 +6,14 @@ Dim intCorrect As Integer
 Dim intIncorrect As Integer
 Dim intContQuestions As Integer
 Dim intTotalQuestions As Integer
-Dim strUserName As String
 Dim strQuestion As String
 Dim strAnswer As String
-Public gIntCount As Integer
+
 
 Dim qzQuiz As CQuiz
 Dim qstQuestion As CQuestion
 Dim lqstCllQuestions As Collection
-Dim blnValidData As Boolean
+Dim blnRandomQuestions As Boolean
 
 Dim sCountDown As Shape
 Dim sContCorrect As Shape
@@ -26,6 +21,7 @@ Dim sConIncorrect As Shape
 Dim sContQuestions As Shape
 Dim sQuestion As Shape
 Dim sAnswer As Shape
+Dim sRandomQuestions As Shape
 
 Dim sTimeUp As Shape
 Dim sOptNext As Shape
@@ -38,10 +34,23 @@ Dim lCorrectColor As Long
 Dim lIncorrectColor As Long
 Dim lTransparentYellowColor As Long
 
+Dim strPath As String
+Dim intTimerSeconds As String
 
-Sub YourName()
-    strUserName = InputBox(Prompt:="Type you name")
-    MsgBox "Welcome " + strUserName, vbApplicationModal, "France trivia quiz"
+
+Sub AskPathTXT()
+    strPath = InputBox(Prompt:="Enter the path of the .txt file where quiz questions are located.")
+    'MsgBox " this " + strPath, vbApplicationModal, " quiz"
+End Sub
+
+Sub AskTimerSeconds()
+    intTimerSeconds = InputBox(Prompt:="Type the number of seconds you want to be tested per each question.")
+    'MsgBox " this " + intTimerSeconds, vbApplicationModal, " quiz"
+End Sub
+
+Sub AskFieldsToStartQuiz()
+    Call AskPathTXT
+    Call AskTimerSeconds
 End Sub
 
 ' ==============================================================================================================
@@ -52,6 +61,8 @@ End Sub
 
 Sub ShortVariablesName()
 
+    Set sRandomQuestions = ActivePresentation.Slides(2).Shapes("optRandomQuestions")
+    
     Set sCountDown = ActivePresentation.Slides(3).Shapes("tltCountdown")
     Set sContCorrect = ActivePresentation.Slides(3).Shapes("tltContCorrect")
     Set sConIncorrect = ActivePresentation.Slides(3).Shapes("tltContIncorrect")
@@ -77,7 +88,6 @@ Sub InitializeVarables()
     intCorrect = 0
     intIncorrect = 0
     blnQuestion = False
-    strUserName = "Student"
     intContQuestions = 0
     intTotalQuestions = 0
     gIntCount = 0
@@ -86,7 +96,9 @@ Sub InitializeVarables()
     blnStatusQuiz = True
     strQuestion = ""
     strAnswer = ""
-      
+    blnRandomQuestions = False
+    
+    sRandomQuestions.TextFrame.TextRange.Text = "Not random"
     sCountDown.TextFrame.TextRange.Text = "-"
     sContCorrect.TextFrame.TextRange.Text = "0"
     sConIncorrect.TextFrame.TextRange.Text = "0"
@@ -96,18 +108,24 @@ Sub InitializeVarables()
     
     Call UpdateColorAnswerBox(0)
       
-    Set qzQuiz = New CQuiz
     Set lqstCllQuestions = New Collection
-  
-    Set lqstCllQuestions = qzQuiz.UnsortedQuestions
-    'Set lqstCllQuestions = qzQuiz.SortedQuestions
     
+    Set qzQuiz = New CQuiz
+    
+    qzQuiz.Path = strPath
+    
+    qzQuiz.LoadDataFromTXT
+    
+    Set lqstCllQuestions = qzQuiz.SortedQuestions
+        
     Call SetQuizNumberQuestions
          
         
 End Sub
 
 Sub StartQuiz()
+    
+    Call AskFieldsToStartQuiz
     
     ' initialize values
     Call ShortVariablesName
@@ -167,6 +185,7 @@ End Sub
 Sub SetQuizNumberQuestions()
     '   TODO REad from List
     intTotalQuestions = lqstCllQuestions.Count
+    Debug.Print intTotalQuestions
     
 End Sub
 
@@ -282,6 +301,23 @@ Sub ShowAnswer(intAnswerBoxState As Integer)
     End If
 End Sub
 
+Sub IsRandom()
+
+    
+    If blnRandomQuestions Then
+        sRandomQuestions.TextFrame.TextRange.Text = "Not random"
+        Set lqstCllQuestions = qzQuiz.SortedQuestions
+        blnRandomQuestions = False
+        
+    Else
+        sRandomQuestions.TextFrame.TextRange.Text = "Random"
+        Set lqstCllQuestions = qzQuiz.UnsortedQuestions
+        blnRandomQuestions = True
+        
+    End If
+End Sub
+
+
 ' ==============================================================================================================
 ' CountDown method
 
@@ -290,7 +326,7 @@ Sub StartCountDown()
     Dim intCountDown As Integer
 
     dteTime = Now()
-    intCountDown = 5
+    intCountDown = CInt(intTimerSeconds)
 
     dteTime = DateAdd("s", intCountDown, dteTime)
 
@@ -300,11 +336,17 @@ Sub StartCountDown()
         If Not (blnAnswerInMind) Then
             ' run counter'
             sCountDown.TextFrame.TextRange.Text = Format((dteTime - Now()), "s")
+        Else
+            Debug.Print "Exit Do"
+            Exit Do
         End If
     Loop
 
     ' When time is up and there is no answer in student's mind
     If Not (blnAnswerInMind) Then
+    
+        Debug.Print "When time is up and there is no answer in student's mind"
+        sCountDown.TextFrame.TextRange.Text = "0"
         ' It increase in 1 the number of incorrect questions
         intIncorrect = intIncorrect + 1
         ' It update the number of question in the view by its name'
@@ -358,20 +400,13 @@ End Function
 ' ==============================================================================================================
 ' help methods to show scores
 
-Sub Results()
-    MsgBox "You've got" & intCorrect & " out of " & intCorrect + intIncorrect, vbApplicationModal, "France trivia quiz"
-End Sub
-
-Sub ResultsGlobal()
-    MsgBox "You've got" & gIntCount
-End Sub
 
 Sub UpdateColorAnswerBox(intStateAnswerColor As Integer)
         
     Dim x As Long
     
     Select Case intStateAnswerColor
-      Case 0 ' clear all
+      Case 0 ' Clear colors
          sQuestion.Fill.ForeColor.RGB = lTransparentYellowColor
          sAnswer.Fill.ForeColor.RGB = lTransparentYellowColor
       Case 1 ' Update to GREEN color as a correct answer or question
@@ -393,7 +428,7 @@ Sub UpdateColorAnswerBox(intStateAnswerColor As Integer)
          MsgBox "Unknown Number"
    End Select
 
-   Debug.Print "ReplaceColors"
+   
 
 End Sub
 
@@ -436,6 +471,8 @@ Sub ReplaceColorsSample()
             End With
         Next
 End Sub
+
+
 
 
 
